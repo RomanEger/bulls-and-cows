@@ -1,4 +1,7 @@
 package org.example;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -34,8 +37,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
-
         while(true) {
+            String winner;
             boolean isUnique;
             int length;
             int choice;
@@ -98,7 +101,8 @@ public class Main {
 
                 Game game = new Game();
                 int steps = game.gameVsBot(bulls);
-                System.out.printf("Победа!\nШагов:\t%d\n",steps);
+                winner = ("Победа!\nШагов:\t" + steps);
+                System.out.println(winner);
             }
             else {
                 String firstNickName, secondNickName;
@@ -153,22 +157,52 @@ public class Main {
 
                 Tuple<String, String> nickNames = new Tuple<>(firstNickName, secondNickName);
                 Tuple<Bulls, Bulls> bullsTuple = new Tuple<>(firstPlayerBulls, secondPlayerBulls);
-                Game game = new Game();
-                Tuple<String, Integer> result = game.gameVsPlayer(bullsTuple, nickNames);
+                Tuple<String, Integer> result = new Game().gameVsPlayer(bullsTuple, nickNames);
 
                 if(result.getSecond() < 0){
-                    System.out.println("Ничья!");
+                    winner = "Ничья!";
+                    System.out.println(winner);
                 }
                 else {
-                    System.out.printf("Победил %s!\nШагов:\t%d\n", result.getFirst(), result.getSecond());
+                    winner = "Победил" + result.getFirst() + "!\nШагов:\t" + result.getSecond();
+                    System.out.println(winner);
                 }
             }
+            System.out.println("Хотите записать рекорд в файл?\n" +
+                    "1 Да\n" +
+                    "2 Нет");
+            while(true){
+                try{
+                    int ans = new Scanner(System.in).nextInt();
+                    if(ans == 1){
+                        while(true){
+                            try{
+                                System.out.println("Введите адрес файла");
+                                writeResult(winner);
+                                break;
+                            }
+                            catch (Exception e){
+                                System.out.println("Файл не найден");
+                            }
+                        }
+                    }
+                    else if(ans != 2)
+                        throw new Exception();
+                    else
+                        continue;
+
+                    break;
+                }
+                catch (Exception e){
+                    System.out.println("Некорректный ответ");
+                }
+            }
+
             System.out.println("Хотите начать игру заново?\n" +
                     "1 Да\n" +
                     "2 Нет");
 
             int next;
-
             try {
                 next = new Scanner(System.in).nextInt();
             } catch (Exception ex) {
@@ -194,17 +228,11 @@ public class Main {
         }
     }
 
-    private static int[] writeResult(int length){
-        int[] attempt = new int[length];
-        System.out.println("Введите Ваш ответ");
-        try {
-            for (int i = 0; i < attempt.length; ) {
-                attempt[i++] = new Scanner(System.in).nextInt();
-            }
-        } catch (Exception e) {
-            System.out.println("Необходимо вводить целое число!\n" +
-                    "Попробуйте ещё раз");
-        }
-        return attempt;
+    private static void writeResult(String winner) throws IOException {
+        String filePath = new Scanner(System.in).next();
+        File file = new File(filePath);
+        FileWriter writer = new FileWriter(file, false);
+        writer.write(winner);
+        writer.flush();
     }
 }

@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -153,14 +154,28 @@ public class Game {
     public Tuple<Integer, Integer> getBullsAndCows(int[] arrBulls, int[] attempt){
         int countBulls = 0;
         int countCows = 0;
+//        HashMap<Integer, Integer> attemptMap = new HashMap<>();
+//
+//        for(int i = 0; i < attempt.length; i++){
+//            attemptMap.put(i, attempt[i]);
+//        }
+
+        HashMap<Integer, Integer> bullsMap = new HashMap<>();
+
+        for(int i = 0; i < arrBulls.length; i++){
+            bullsMap.put(i, arrBulls[i]);
+        }
+
         for (int i = 0; i < arrBulls.length; i++) {
-            if (attempt[i] == arrBulls[i]) {
+            if (attempt[i] == bullsMap.get(i)) {
                 countBulls++;
+                bullsMap.remove(i);
             }
             else {
                 for (int j = 0; j < arrBulls.length; j++) {
-                    if (attempt[i] == arrBulls[j] && i != j) {
+                    if (bullsMap.containsKey(j) && attempt[i] == bullsMap.get(j) && i != j) {
                         countCows++;
+                        bullsMap.remove(j);
                     }
                 }
             }
