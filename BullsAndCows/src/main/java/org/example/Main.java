@@ -1,10 +1,7 @@
 package org.example;
-
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
-    //дописать
     private static String getRules(boolean isBot){
         if(isBot){
             return "\n" +
@@ -37,6 +34,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+
         while(true) {
             boolean isUnique;
             int length;
@@ -87,104 +85,110 @@ public class Main {
                         bulls = new Bulls(length, isUnique);
 
                         break;
-                    } catch (Exception ex) {
+                    }
+                    catch (IllegalArgumentException ex){
+                        System.out.println(ex.getMessage()+
+                                "\nПопробуйте ещё раз.");
+                    }
+                    catch (Exception ex) {
                         System.out.println("Размер должен быть представлен целым числом!\n" +
                                 "Попробуйте ещё раз.");
                     }
                 }
 
-                int[] arrBulls = bulls.getBulls();
-
-                boolean isWin = false;
-                while (!isWin) {
-                    int[] attempt = writeResult(arrBulls.length);
-                    int countBulls = 0, countCows = 0;
-                    for (int i = 0; i < arrBulls.length; i++) {
-                        if (attempt[i] == arrBulls[i]) {
-                            countBulls++;
-                        } else {
-                            for (int j = 0; j < arrBulls.length; j++) {
-                                if (attempt[i] == arrBulls[j] && i != j) {
-                                    countCows++;
-                                }
-                            }
-                        }
-                    }
-
-                    System.out.printf("Кол-во быков: %d\tКол-во коров: %d\n", countBulls, countCows);
-
-                    if (countBulls == arrBulls.length)
-                        isWin = true;
-                }
+                Game game = new Game();
+                int steps = game.gameVsBot(bulls);
+                System.out.printf("Победа!\nШагов:\t%d\n",steps);
             }
             else {
-                Bulls bulls;
-                while (true) {
+                String firstNickName, secondNickName;
+
+                System.out.println("Игрок 1, введите Ваше имя");
+                firstNickName = new Scanner(System.in).next();
+
+                System.out.println("Игрок 2, введите Ваше имя");
+                secondNickName = new Scanner(System.in).next();
+
+                Bulls firstPlayerBulls, secondPlayerBulls;
+                while (true){
                     try {
                         System.out.print("Задайте размер загаданного числа:\t");
 
                         length = new Scanner(System.in).nextInt();
-
-                        bulls = new Bulls(length, isUnique);
-
                         break;
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex) {
                         System.out.println("Размер должен быть представлен целым числом!\n" +
                                 "Попробуйте ещё раз.");
                     }
                 }
+                Writer writer = new Writer();
+                while (true){
+                    try{
+                        System.out.printf("%s, Введите Ваше число\n", firstNickName);
 
-                int[] arrBulls = bulls.getBulls();
+                        int[] firstBulls = writer.write(length);
 
-                boolean isWin = false;
-                while (!isWin) {
-                    int[] attempt = writeResult(arrBulls.length);
-                    int countBulls = 0, countCows = 0;
-                    for (int i = 0; i < arrBulls.length; i++) {
-                        if (attempt[i] == arrBulls[i]) {
-                            countBulls++;
-                        } else {
-                            for (int j = 0; j < arrBulls.length; j++) {
-                                if (attempt[i] == arrBulls[j] && i != j) {
-                                    countCows++;
-                                }
-                            }
-                        }
+                        firstPlayerBulls = new Bulls(firstBulls, isUnique);
+                        break;
                     }
-
-                    System.out.printf("Кол-во быков: %d\tКол-во коров: %d\n", countBulls, countCows);
-
-                    if (countBulls == arrBulls.length)
-                        isWin = true;
+                    catch (Exception ex){
+                        System.out.println(ex.getMessage()+
+                                "\nПопробуйте ещё раз.");
+                    }
                 }
-
-                System.out.println("Хотите начать игру заново?\n" +
-                        "1 Да\n" +
-                        "2 Нет");
-
-                int next;
-
-                try {
-                    next = new Scanner(System.in).nextInt();
-                } catch (Exception ex) {
-                    System.out.println("До свидания!");
-                    next = 2;
-                }
-
-                if (next != 1) {
-                    break;
-                } else {
+                while (true) {
                     try {
-                        final String os = System.getProperty("os.name");
+                        System.out.printf("%s, Введите Ваше число\n", secondNickName);
+                        int[] secondBulls = writer.write(length);
 
-                        if (os.contains("Windows")) {
-                            Runtime.getRuntime().exec("cls");
-                        } else {
-                            Runtime.getRuntime().exec("clear");
-                        }
-                    } catch (final Exception e) {
-                        System.out.println("Ошибка при очистке консоли");
+                        secondPlayerBulls = new Bulls(secondBulls, isUnique);
+                        break;
                     }
+                    catch (Exception ex){
+                        System.out.println(ex.getMessage()+
+                                "\nПопробуйте ещё раз.");
+                    }
+                }
+
+                Tuple<String, String> nickNames = new Tuple<>(firstNickName, secondNickName);
+                Tuple<Bulls, Bulls> bullsTuple = new Tuple<>(firstPlayerBulls, secondPlayerBulls);
+                Game game = new Game();
+                Tuple<String, Integer> result = game.gameVsPlayer(bullsTuple, nickNames);
+
+                if(result.getSecond() < 0){
+                    System.out.println("Ничья!");
+                }
+                else {
+                    System.out.printf("Победил %s!\nШагов:\t%d\n", result.getFirst(), result.getSecond());
+                }
+            }
+            System.out.println("Хотите начать игру заново?\n" +
+                    "1 Да\n" +
+                    "2 Нет");
+
+            int next;
+
+            try {
+                next = new Scanner(System.in).nextInt();
+            } catch (Exception ex) {
+                System.out.println("До свидания!");
+                next = 2;
+            }
+
+            if (next != 1) {
+                break;
+            } else {
+                try {
+                    final String os = System.getProperty("os.name");
+
+                    if (os.contains("Windows")) {
+                        Runtime.getRuntime().exec("cls");
+                    } else {
+                        Runtime.getRuntime().exec("clear");
+                    }
+                } catch (final Exception e) {
+                    System.out.println("Ошибка при очистке консоли");
                 }
             }
         }
@@ -203,6 +207,4 @@ public class Main {
         }
         return attempt;
     }
-
-
 }
